@@ -5,8 +5,7 @@ public class Grid : MonoBehaviour
 {
     [SerializeField] private Material gridMaterial;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
         var gridPoints = Enumerable.Range(0, 10)
             .Select(i => i - 0.5f)

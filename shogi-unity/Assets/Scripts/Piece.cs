@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class Piece : MonoBehaviour
 {
-    private string type;
     private bool promoted;
+
+    public string Type { get; private set; }
 
     bool IsPlayer2()
     {
@@ -12,9 +13,9 @@ public class Piece : MonoBehaviour
 
     public void Setup(string type, byte x, byte y, bool isPlayer2)
     {
-        if (this.type == null)
+        if (Type == null)
         {
-            this.type = type;
+            Type = type;
             transform.position = new Vector3(x, y, 0f);
             promoted = false;
             if (isPlayer2)
