@@ -70,7 +70,7 @@ public class BoardManager : MonoBehaviour
 
         var piece1 = Instantiate(prefab).GetComponent<Piece>();
         piece1.gameObject.transform.SetParent(transform);
-        piece1.Setup(type, player2Only && !bothPlayers);
+        piece1.Setup(type, x, y, player2Only && !bothPlayers);
         board[x, y] = piece1;
 
         if (bothPlayers)
@@ -79,7 +79,7 @@ public class BoardManager : MonoBehaviour
             byte y2 = (byte)(8 - y);
             var piece2 = Instantiate(prefab).GetComponent<Piece>();
             piece2.gameObject.transform.SetParent(transform);
-            piece2.Setup(type, true);
+            piece2.Setup(type, x, y, true);
             board[x2, y2] = piece2;
         }
     }

@@ -6,11 +6,12 @@ public class Piece : MonoBehaviour
     private bool isPlayer2;
     private bool promoted;
 
-    public void Setup(string type, bool isPlayer2)
+    public void Setup(string type, byte x, byte y, bool isPlayer2)
     {
         if (type == null)
         {
             this.type = type;
+            transform.position.Set(x, y, 0);
             this.isPlayer2 = isPlayer2;
             promoted = false;
         }
