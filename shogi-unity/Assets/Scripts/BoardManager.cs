@@ -79,7 +79,7 @@ public class BoardManager : MonoBehaviour
             byte y2 = (byte)(8 - y);
             var piece2 = Instantiate(prefab).GetComponent<Piece>();
             piece2.gameObject.transform.SetParent(transform);
-            piece2.Setup(type, x, y, true);
+            piece2.Setup(type, x2, y2, true);
             board[x2, y2] = piece2;
         }
     }
