@@ -1,12 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Piece : MonoBehaviour
 {
-    private bool promoted;
-
     public string Type { get; private set; }
+    public bool Promoted { get; private set; }
 
-    bool IsPlayer2()
+    public List<Vector2Int> Reach { get; private set; }
+
+    public bool IsPlayer2()
     {
         return transform.rotation.eulerAngles.z == 180f;
     }
@@ -17,10 +19,15 @@ public class Piece : MonoBehaviour
         {
             Type = type;
             transform.position = new Vector3(x, y, 0f);
-            promoted = false;
+            Promoted = false;
             if (isPlayer2)
                 transform.Rotate(0f, 0f, 180f);
         }
+    }
+
+    public void UpdateReach()
+    {
+        Reach = MoveManager.GetReach(this);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

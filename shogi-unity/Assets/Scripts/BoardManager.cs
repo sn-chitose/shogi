@@ -8,9 +8,9 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private GameObject[] piecePrefabs;
 
     private Dictionary<string, GameObject> pieceTypes;
-
-    private Piece[,] board; // bottom left as (0, 0)
     private Dictionary<string, List<Piece>> capturedPlayer1, capturedPlayer2;
+
+    public Piece[,] Board { get; private set; }
 
     void Awake()
     {
@@ -34,7 +34,7 @@ public class BoardManager : MonoBehaviour
             capturedPlayer2.Add(type, new List<Piece>());
         }
 
-        board = new Piece[9, 9];
+        Board = new Piece[9, 9];
         SetupPieces();
     }
 
@@ -71,7 +71,7 @@ public class BoardManager : MonoBehaviour
         var piece1 = Instantiate(prefab).GetComponent<Piece>();
         piece1.gameObject.transform.SetParent(transform);
         piece1.Setup(type, x, y, player2Only && !bothPlayers);
-        board[x, y] = piece1;
+        Board[x, y] = piece1;
 
         if (bothPlayers)
         {
@@ -80,7 +80,7 @@ public class BoardManager : MonoBehaviour
             var piece2 = Instantiate(prefab).GetComponent<Piece>();
             piece2.gameObject.transform.SetParent(transform);
             piece2.Setup(type, x2, y2, true);
-            board[x2, y2] = piece2;
+            Board[x2, y2] = piece2;
         }
     }
 
