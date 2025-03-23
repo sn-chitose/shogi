@@ -31,4 +31,17 @@ public class Grid : MonoBehaviour
         lineRenderer.SetPosition(0, new Vector3(x1, y1, 0));
         lineRenderer.SetPosition(1, new Vector3(x2, y2, 0));
     }
+
+    void OnMouseDown()
+    {
+        if (BoardManager.instance.Busy)
+            return;
+
+        // If a piece is selected, try to move it to this empty position
+        if (BoardManager.instance.SelectedPiece != null)
+        {
+            var cursor = GameObject.Find("Cursor").transform.position;
+            BoardManager.instance.TryAndMove((int)cursor.x, (int)cursor.y);
+        }
+    }
 }

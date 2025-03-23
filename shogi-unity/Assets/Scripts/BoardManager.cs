@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class BoardManager : MonoBehaviour
@@ -11,6 +12,9 @@ public class BoardManager : MonoBehaviour
     private Dictionary<string, List<Piece>> capturedPlayer1, capturedPlayer2;
 
     public Piece[,] Board { get; private set; }
+    public Piece SelectedPiece { get; set; }
+
+    public bool Busy { get; set; }
 
     void Awake()
     {
@@ -84,10 +88,68 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public void TryAndCapture(Piece toCapture)
+    {
+        // TODO check if the move is legal
+        if (SelectedPiece.Reach.Contains(new Vector2Int((int)toCapture.transform.position.x, (int)toCapture.transform.position.y)))
+            CapturePiece(toCapture);
+    }
+
+    public void TryAndMove(int x, int y)
+    {
+        // TODO check if the move is legal
+        if (SelectedPiece.Reach.Contains(new Vector2Int(x, y)))
+            MovePiece(x, y);
+    }
+
+    // Moves the selected piece to capture the given piece
+    // Assumes the move to be legal
+    private void CapturePiece(Piece toCapture)
+    {
+        Busy = true;
+        var hand = SelectedPiece.IsPlayer2() ? capturedPlayer2 : capturedPlayer1;
+        hand[toCapture.Type].Add(toCapture);
+        
+        int x = (int)toCapture.transform.position.x,
+            y = (int)toCapture.transform.position.y;
+        toCapture.SetRenderingOrder(10 * hand[toCapture.Type].Count);
+        _ = toCapture.transform.DOMove(new Vector3(-x, -y, 0f), 0.5f)// TODO find location for captured pieces
+            .OnComplete(() => { Busy = false; });
+        MovePiece(x, y);
+    }
+
+    // Moves the selected piece to an empty position on the board
+    // Assumes the move to be legal
+    private void MovePiece(int x, int y)
+    {
+        Busy = true;
+        Board[(int)SelectedPiece.transform.position.x, (int)SelectedPiece.transform.position.y] = null;
+        Board[x, y] = SelectedPiece;
+
+        SelectedPiece.SetRenderingOrder(1000);
+        var moving = SelectedPiece;
+        _ = SelectedPiece.transform.DOMove(new Vector3(x, y, 0f), 0.5f)
+            .OnComplete(() =>
+            {
+                moving.SetRenderingOrder(0);
+                UpdateReachForAll();
+                Busy = false;
+            });
+
+        SelectedPiece.DeselectPiece();
+    }
+
+    private void UpdateReachForAll()
+    {
+        foreach (var piece in Board)
+            if (piece != null)
+                piece.UpdateReach();
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        UpdateReachForAll();
     }
 
     // Update is called once per frame
