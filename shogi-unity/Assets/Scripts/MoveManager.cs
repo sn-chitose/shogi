@@ -4,6 +4,54 @@ using UnityEngine;
 
 public class MoveManager
 {
+    // Checks whether the own king is in check after the specified move
+    // Assumes the target position is in the reach of the moving piece
+    public static bool IsCheckAfterMove(Piece piece, Vector2Int target)
+    {
+        var start = new Vector2Int((int)piece.transform.position.x, (int)piece.transform.position.y);
+        foreach (var opponent in BoardManager.instance.Board)
+            if (opponent != null && opponent.IsPlayer2() != piece.IsPlayer2())
+            {
+                var opponentPosition = new Vector2Int((int)opponent.transform.position.x, (int)opponent.transform.position.y);
+                
+                // Skip this opponent piece because it is captured
+                if (opponentPosition == target)
+                    continue;
+
+                // Check for opponent step moves only if the moving piece is the king itself
+                // Other movements cannot make the king in check by step moves
+                if (piece.IsKing())
+                    if (opponent.Reach.Contains(target) || StepList(opponent).Select(position => position + opponentPosition).Contains(target))
+                        return true;
+
+                var directions = MoveDirections(opponent);
+                foreach (var direction in directions)
+                    for (var tempPosition = opponentPosition + direction;
+                        tempPosition.x >= 0 && tempPosition.x < 9 && tempPosition.y >= 0 && tempPosition.y < 9;
+                        tempPosition += direction)
+                    {
+                        if (tempPosition == start)
+                            continue;
+
+                        if (tempPosition == target)
+                        {
+                            if (piece.IsKing())
+                                return true;
+                            break;
+                        }
+
+                        var reachable = BoardManager.instance.Board[tempPosition.x, tempPosition.y];
+                        if (reachable != null)
+                        {
+                            if (reachable.IsPlayer2() == piece.IsPlayer2() && reachable.IsKing())
+                                return true;
+                            break;
+                        }
+                    }
+            }
+        return false;
+    }
+
     // Positions inside the reach of a piece.
     // Legal moves for standard movement, without checking special case rules.
     public static List<Vector2Int> GetReach(Piece piece)
@@ -19,8 +67,7 @@ public class MoveManager
             })
             .ToList();
 
-        var directions = MoveDirections(piece);
-        foreach (var direction in directions)
+        MoveDirections(piece).ForEach(direction =>
         {
             for (var tempPosition = startPosition + direction;
                 tempPosition.x >= 0 && tempPosition.x < 9 && tempPosition.y >= 0 && tempPosition.y < 9;
@@ -38,7 +85,7 @@ public class MoveManager
                     candidates.Add(tempPosition);
                 }
             }
-        }
+        });
         return candidates;
     }
 
@@ -83,14 +130,11 @@ public class MoveManager
     }
 
     // List of long move directions by piece type
-    private static List<Vector2Int> MoveDirections(Piece piece)
+    private static List<Vector2Int> MoveDirections(Piece piece) => piece.Type switch
     {
-        return piece.Type switch
-        {
-            "Hisha" => new List<Vector2Int>() { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right },
-            "Kakugyou" => new List<Vector2Int>() { new(-1, 1), new(1, 1), new(-1, -1), new(1, -1) },
-            "Kyousha" when !piece.Promoted => new List<Vector2Int>() { piece.IsPlayer2() ? Vector2Int.down : Vector2Int.up },
-            _ => new List<Vector2Int>(),
-        };
-    }
+        "Hisha" => new List<Vector2Int>() { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right },
+        "Kakugyou" => new List<Vector2Int>() { new(-1, 1), new(1, 1), new(-1, -1), new(1, -1) },
+        "Kyousha" when !piece.Promoted => new List<Vector2Int>() { piece.IsPlayer2() ? Vector2Int.down : Vector2Int.up },
+        _ => new List<Vector2Int>(),
+    };
 }

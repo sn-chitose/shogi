@@ -90,15 +90,13 @@ public class BoardManager : MonoBehaviour
 
     public void TryAndCapture(Piece toCapture)
     {
-        // TODO check if the move is legal
-        if (SelectedPiece.Reach.Contains(new Vector2Int((int)toCapture.transform.position.x, (int)toCapture.transform.position.y)))
+        if (SelectedPiece.LegalMoves.Contains(new Vector2Int((int)toCapture.transform.position.x, (int)toCapture.transform.position.y)))
             CapturePiece(toCapture);
     }
 
     public void TryAndMove(int x, int y)
     {
-        // TODO check if the move is legal
-        if (SelectedPiece.Reach.Contains(new Vector2Int(x, y)))
+        if (SelectedPiece.LegalMoves.Contains(new Vector2Int(x, y)))
             MovePiece(x, y);
     }
 

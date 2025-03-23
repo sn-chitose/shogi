@@ -9,11 +9,15 @@ public class Piece : MonoBehaviour
     public bool Promoted { get; private set; }
 
     public List<Vector2Int> Reach { get; private set; }
+    public List<Vector2Int> LegalMoves { get; private set; }
 
-    public bool IsPlayer2()
+    public bool IsPlayer2() => transform.rotation.eulerAngles.z == 180f;
+
+    public bool IsKing() => Type switch
     {
-        return transform.rotation.eulerAngles.z == 180f;
-    }
+        "Gyokushou" or "Oushou" => true,
+        _ => false,
+    };
 
     public void Setup(string type, byte x, byte y, bool isPlayer2)
     {
@@ -30,6 +34,10 @@ public class Piece : MonoBehaviour
     public void UpdateReach()
     {
         Reach = MoveManager.GetReach(this);
+        if (LegalMoves == null)
+            LegalMoves = new List<Vector2Int>();
+        else
+            LegalMoves.Clear();
     }
 
     public void SelectPiece()
@@ -38,6 +46,10 @@ public class Piece : MonoBehaviour
         transform.Find("SelectionCursor").gameObject.SetActive(true);
         foreach (var reachable in Reach)
         {
+            if (MoveManager.IsCheckAfterMove(this, reachable))
+                continue;
+
+            LegalMoves.Add(reachable);
             var marker = Instantiate(reachablePrefab);
             marker.transform.parent = transform;
             marker.transform.position = new Vector3(reachable.x, reachable.y, 0f);
@@ -77,9 +89,9 @@ public class Piece : MonoBehaviour
         var selectionCursor = transform.Find("SelectionCursor");
         selectionCursor.gameObject.SetActive(false);
         selectionCursor.GetComponent<SpriteRenderer>().sortingOrder = order;
-        
+
         GetComponent<SpriteRenderer>().sortingOrder = order + 1;
-        
+
         transform.Find("Front").GetComponent<SpriteRenderer>().sortingOrder = order + 2;
         var back = transform.Find("Back");
         if (back != null)
@@ -89,12 +101,12 @@ public class Piece : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
