@@ -89,7 +89,7 @@ public class MoveManager
         {
             "Hisha" => new List<Vector2Int>() { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right },
             "Kakugyou" => new List<Vector2Int>() { new(-1, 1), new(1, 1), new(-1, -1), new(1, -1) },
-            "Kyousha" when !piece.Promoted => new List<Vector2Int>() { piece.IsPlayer2() ? Vector2Int.up : Vector2Int.down },
+            "Kyousha" when !piece.Promoted => new List<Vector2Int>() { piece.IsPlayer2() ? Vector2Int.down : Vector2Int.up },
             _ => new List<Vector2Int>(),
         };
     }
