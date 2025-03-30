@@ -111,8 +111,10 @@ public class BoardManager : MonoBehaviour
         int x = (int)toCapture.transform.position.x,
             y = (int)toCapture.transform.position.y;
         toCapture.SetRenderingOrder(10 * hand[toCapture.Type].Count);
-        _ = toCapture.transform.DOMove(new Vector3(-x, -y, 0f), 0.5f)// TODO find location for captured pieces
-            .OnComplete(() => { Busy = false; });
+        var seq = DOTween.Sequence();
+        seq.Join(toCapture.transform.DOMove(BoardGrid.GetPositionWhenCaptured(toCapture, SelectedPiece.IsPlayer2()), 0.5f));// TODO find location for captured pieces
+        seq.Join(toCapture.transform.DORotate(new Vector3(0, 0, SelectedPiece.IsPlayer2() ? 180 : 0), 0.5f, RotateMode.FastBeyond360));// TODO find location for captured pieces
+        seq.OnComplete(() => { Busy = false; });
         MovePiece(x, y);
     }
 

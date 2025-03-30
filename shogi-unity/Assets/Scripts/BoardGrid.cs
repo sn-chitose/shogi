@@ -11,7 +11,7 @@ public class BoardGrid : MonoBehaviour
             .Select(i => i - 0.5f)
             .ToArray();
 
-        foreach(var point in gridPoints)
+        foreach (var point in gridPoints)
         {
             DrawLine(point, gridPoints.First(), point, gridPoints.Last());
             DrawLine(gridPoints.First(), point, gridPoints.Last(), point);
@@ -43,5 +43,26 @@ public class BoardGrid : MonoBehaviour
             var cursor = GameObject.Find("Cursor").transform.position;
             BoardManager.instance.TryAndMove((int)cursor.x, (int)cursor.y);
         }
+    }
+
+    public static Vector3 GetPositionWhenCaptured(Piece piece, bool isPlayer2Afterwards)
+    {
+        Vector2 position = piece.Type switch
+        {
+            "Fuhyou" => new Vector3(9.7f, 3, 0),
+            "Kyousha" => new Vector3(9.2f, 2, 0),
+            "Keima" => new Vector3(10.2f, 2, 0),
+            "Ginshou" => new Vector3(9.2f, 1, 0),
+            "Kinshou" => new Vector3(10.2f, 1, 0),
+            "Kakugyou" => new Vector3(9.2f, 0, 0),
+            "Hisha" => new Vector3(10.2f, 0, 0),
+            _ => Vector3.zero
+        };
+        if (isPlayer2Afterwards)
+        {
+            position.x = 8 - position.x;
+            position.y = 8 - position.y;
+        }
+        return position;
     }
 }
