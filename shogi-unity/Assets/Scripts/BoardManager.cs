@@ -88,6 +88,12 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public void TryAndDrop(int x, int y)
+    {
+        if (SelectedPiece.LegalMoves.Contains(new Vector2Int(x, y)))
+            DropPiece(x, y);
+    }
+
     public void TryAndCapture(Piece toCapture)
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int((int)toCapture.transform.position.x, (int)toCapture.transform.position.y)))
@@ -98,6 +104,28 @@ public class BoardManager : MonoBehaviour
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int(x, y)))
             MovePiece(x, y);
+    }
+
+    // Drops the selected piece to an empty position on the board
+    // Assumes the move to be legal
+    private void DropPiece(int x, int y)
+    {
+        Busy = true;
+        (SelectedPiece.IsPlayer2() ? capturedPlayer2 : capturedPlayer1)[SelectedPiece.Type]
+            .Remove(SelectedPiece);
+        Board[x, y] = SelectedPiece;
+
+        SelectedPiece.SetRenderingOrder(1000);
+        var moving = SelectedPiece;
+        _ = SelectedPiece.transform.DOMove(new Vector3(x, y, 0f), 0.5f)
+            .OnComplete(() =>
+            {
+                moving.SetRenderingOrder(0);
+                UpdateReachForAll();
+                Busy = false;
+            });
+
+        SelectedPiece.DeselectPiece();
     }
 
     // Moves the selected piece to capture the given piece
@@ -143,6 +171,12 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var piece in Board)
             if (piece != null)
+                piece.UpdateReach();
+        foreach (var type in capturedPlayer1.Values)
+            foreach (var piece in type)
+                piece.UpdateReach();
+        foreach (var type in capturedPlayer2.Values)
+            foreach (var piece in type)
                 piece.UpdateReach();
     }
 

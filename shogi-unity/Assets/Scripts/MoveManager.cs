@@ -13,7 +13,7 @@ public class MoveManager
             if (opponent != null && opponent.IsPlayer2() != piece.IsPlayer2())
             {
                 var opponentPosition = new Vector2Int((int)opponent.transform.position.x, (int)opponent.transform.position.y);
-                
+
                 // Skip this opponent piece because it is captured
                 if (opponentPosition == target)
                     continue;
@@ -50,6 +50,47 @@ public class MoveManager
                     }
             }
         return false;
+    }
+
+    // Positions where a piece can be dropped from the hand
+    // Excludes last rows and same column Fuhyou, but does not evaluate checkmate by Fuhyou drop
+    public static List<Vector2Int> GetDroppable(Piece piece)
+    {
+        List<Vector2Int> candidates = new();
+        for (byte x = 0; x < 9; x++)
+            for (byte y = 0; y < 9; y++)
+                if (BoardManager.instance.Board[x, y] == null)
+                {
+                    switch (piece.Type)
+                    {
+                        case "Fuhyou":
+                            if (y == (piece.IsPlayer2() ? 0 : 8))
+                                continue;
+                            bool found = false;
+                            for (byte y_ = 0; y_ < 9; y_++)
+                            {
+                                var p = BoardManager.instance.Board[x, y_];
+                                if (p != null && p.IsPlayer2() == piece.IsPlayer2())
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found)
+                                continue;
+                            break;
+                        case "Kyousha":
+                            if (y == (piece.IsPlayer2() ? 0 : 8))
+                                continue;
+                            break;
+                        case "Keima":
+                            if (y == (piece.IsPlayer2() ? 1 : 7))
+                                continue;
+                            break;
+                    }
+                    candidates.Add(new Vector2Int(x, y));
+                }
+        return candidates;
     }
 
     // Positions inside the reach of a piece.

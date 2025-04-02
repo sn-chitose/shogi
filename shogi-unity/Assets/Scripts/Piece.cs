@@ -9,9 +9,12 @@ public class Piece : MonoBehaviour
     public bool Promoted { get; private set; }
 
     public List<Vector2Int> Reach { get; private set; }
+    public List<Vector2Int> Droppable { get; private set; }
     public List<Vector2Int> LegalMoves { get; private set; }
 
     public bool IsPlayer2() => transform.rotation.eulerAngles.z == 180f;
+
+    public bool IsHand() => transform.position.x % 1 != 0;
 
     public bool IsKing() => Type switch
     {
@@ -33,7 +36,14 @@ public class Piece : MonoBehaviour
 
     public void UpdateReach()
     {
-        Reach = MoveManager.GetReach(this);
+        if (IsHand())
+        {
+            Reach.Clear();
+            Droppable = MoveManager.GetDroppable(this);
+        }
+        else
+            Reach = MoveManager.GetReach(this);
+
         if (LegalMoves == null)
             LegalMoves = new List<Vector2Int>();
         else
@@ -44,10 +54,14 @@ public class Piece : MonoBehaviour
     {
         BoardManager.instance.SelectedPiece = this;
         transform.Find("SelectionCursor").gameObject.SetActive(true);
-        foreach (var reachable in Reach)
+
+        var candidates = IsHand() ? Droppable : Reach;
+        foreach (var reachable in candidates)
         {
             if (MoveManager.IsCheckAfterMove(this, reachable))
                 continue;
+            // if (IsHand() && MoveManager.IsCheckmateAfterDrop(this, reachable))
+            //     continue;
 
             LegalMoves.Add(reachable);
             var marker = Instantiate(reachablePrefab);

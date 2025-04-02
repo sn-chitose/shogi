@@ -41,7 +41,10 @@ public class BoardGrid : MonoBehaviour
         if (BoardManager.instance.SelectedPiece != null)
         {
             var cursor = GameObject.Find("Cursor").transform.position;
-            BoardManager.instance.TryAndMove((int)cursor.x, (int)cursor.y);
+            if (BoardManager.instance.SelectedPiece.IsHand())
+                BoardManager.instance.TryAndDrop((int)cursor.x, (int)cursor.y);
+            else
+                BoardManager.instance.TryAndMove((int)cursor.x, (int)cursor.y);
         }
     }
 
