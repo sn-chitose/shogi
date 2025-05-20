@@ -58,38 +58,43 @@ public class MoveManager
     {
         List<Vector2Int> candidates = new();
         for (byte x = 0; x < 9; x++)
+        {
+            if (piece.Type == "Fuhyou")
+            {
+                bool found = false;
+                for (byte y = 0; y < 9; y++)
+                {
+                    var p = BoardManager.instance.Board[x, y];
+                    if (p != null && p.Type == "Fuhyou"
+                        && p.IsPlayer2() == piece.IsPlayer2())
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found)
+                    continue;
+            }
+
             for (byte y = 0; y < 9; y++)
                 if (BoardManager.instance.Board[x, y] == null)
                 {
                     switch (piece.Type)
                     {
                         case "Fuhyou":
-                            if (y == (piece.IsPlayer2() ? 0 : 8))
-                                continue;
-                            bool found = false;
-                            for (byte y_ = 0; y_ < 9; y_++)
-                            {
-                                var p = BoardManager.instance.Board[x, y_];
-                                if (p != null && p.IsPlayer2() == piece.IsPlayer2())
-                                {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found)
-                                continue;
-                            break;
                         case "Kyousha":
                             if (y == (piece.IsPlayer2() ? 0 : 8))
                                 continue;
                             break;
                         case "Keima":
-                            if (y == (piece.IsPlayer2() ? 1 : 7))
+                            if (y == (piece.IsPlayer2() ? 0 : 8)
+                                || y == (piece.IsPlayer2() ? 1 : 7))
                                 continue;
                             break;
                     }
                     candidates.Add(new Vector2Int(x, y));
                 }
+        }
         return candidates;
     }
 
