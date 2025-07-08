@@ -4,50 +4,98 @@ using UnityEngine;
 
 public class MoveManager
 {
+    // Checks whether the drop is a Fuhyou and would checkmate
+    // Assumes the target position is a valid drop if not checkmating
+    // Specifically assumes the target position is empty
+    public static bool IsCheckmateAfterDropFuhyou(Piece piece, Vector2Int target)
+    {
+        if (piece.Type != "Fuhyou")
+            return false;
+
+        // check if dangerous position is actually king
+        var dangerousPiece = BoardManager.instance.Board[target.x,
+            target.y + (piece.IsPlayer2() ? -1 : 1)];
+        if (dangerousPiece == null || !dangerousPiece.IsKing())
+            return false;
+
+        // check if moves out of check would exist for opponent
+        bool found = false;
+        BoardManager.instance.Board[target.x, target.y] = piece;
+        BoardManager.instance.UpdateReachForAll();
+        foreach (Piece opponent in BoardManager.instance.Board)
+            if (opponent != null
+                && opponent.IsPlayer2() != piece.IsPlayer2()
+                && opponent.Reach.Any(reachable => !IsCheckAfterMove(opponent, reachable)))
+            {
+                found = true;
+                break;
+            }
+
+        // no need to check if drop can clear check
+        // because such drops do not exist
+
+        BoardManager.instance.Board[target.x, target.y] = null;
+        BoardManager.instance.UpdateReachForAll();
+        return !found;
+    }
+
     // Checks whether the own king is in check after the specified move
     // Assumes the target position is in the reach of the moving piece
     public static bool IsCheckAfterMove(Piece piece, Vector2Int target)
     {
-        var start = new Vector2Int((int)piece.transform.position.x, (int)piece.transform.position.y);
-        foreach (var opponent in BoardManager.instance.Board)
-            if (opponent != null && opponent.IsPlayer2() != piece.IsPlayer2())
+        Vector2Int king = new();
+        foreach (var p in BoardManager.instance.Board)
+            if (p != null && p.IsPlayer2() == piece.IsPlayer2()
+                && p.IsKing())
             {
-                var opponentPosition = new Vector2Int((int)opponent.transform.position.x, (int)opponent.transform.position.y);
+                king.x = (int)p.transform.position.x;
+                king.y = (int)p.transform.position.y;
+                break;
+            }
 
-                // Skip this opponent piece because it is captured
-                if (opponentPosition == target)
-                    continue;
+        var start = new Vector2Int((int)piece.transform.position.x, (int)piece.transform.position.y);
+        // use index iteration to consider temporary calculation situations
+        for (int x = 0; x < 9; x++)
+            for (int y = 0; y < 9; y++)
+            {
+                var opponentPosition = new Vector2Int(x, y);
+                var opponent = BoardManager.instance.Board[x, y];
+                if (opponent != null && opponent.IsPlayer2() != piece.IsPlayer2())
+                {
+                    // Skip this opponent piece because it is captured
+                    if (opponentPosition == target)
+                        continue;
 
-                // Check for opponent step moves only if the moving piece is the king itself
-                // Other movements cannot make the king in check by step moves
-                if (piece.IsKing())
-                    if (opponent.Reach.Contains(target) || StepList(opponent).Select(position => position + opponentPosition).Contains(target))
+                    // Check opponent step moves
+                    if (StepList(opponent).Select(position => position + opponentPosition).Contains(piece.IsKing() ? target : king))
                         return true;
 
-                var directions = MoveDirections(opponent);
-                foreach (var direction in directions)
-                    for (var tempPosition = opponentPosition + direction;
-                        tempPosition.x >= 0 && tempPosition.x < 9 && tempPosition.y >= 0 && tempPosition.y < 9;
-                        tempPosition += direction)
-                    {
-                        if (tempPosition == start)
-                            continue;
-
-                        if (tempPosition == target)
+                    // Check opponent range moves
+                    var directions = MoveDirections(opponent);
+                    foreach (var direction in directions)
+                        for (var tempPosition = opponentPosition + direction;
+                            tempPosition.x >= 0 && tempPosition.x < 9 && tempPosition.y >= 0 && tempPosition.y < 9;
+                            tempPosition += direction)
                         {
-                            if (piece.IsKing())
-                                return true;
-                            break;
-                        }
+                            if (tempPosition == start)
+                                continue;
 
-                        var reachable = BoardManager.instance.Board[tempPosition.x, tempPosition.y];
-                        if (reachable != null)
-                        {
-                            if (reachable.IsPlayer2() == piece.IsPlayer2() && reachable.IsKing())
-                                return true;
-                            break;
+                            if (tempPosition == target)
+                            {
+                                if (piece.IsKing())
+                                    return true;
+                                break;
+                            }
+
+                            var reachable = BoardManager.instance.Board[tempPosition.x, tempPosition.y];
+                            if (reachable != null)
+                            {
+                                if (reachable.IsPlayer2() == piece.IsPlayer2() && reachable.IsKing())
+                                    return true;
+                                break;
+                            }
                         }
-                    }
+                }
             }
         return false;
     }

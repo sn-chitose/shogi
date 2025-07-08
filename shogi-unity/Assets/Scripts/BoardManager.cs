@@ -167,7 +167,7 @@ public class BoardManager : MonoBehaviour
         SelectedPiece.DeselectPiece();
     }
 
-    private void UpdateReachForAll()
+    public void UpdateReachForAll()
     {
         foreach (var piece in Board)
             if (piece != null)

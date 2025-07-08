@@ -60,8 +60,8 @@ public class Piece : MonoBehaviour
         {
             if (MoveManager.IsCheckAfterMove(this, reachable))
                 continue;
-            // if (IsHand() && MoveManager.IsCheckmateAfterDrop(this, reachable))
-            //     continue;
+            if (IsHand() && MoveManager.IsCheckmateAfterDropFuhyou(this, reachable))
+                continue;
 
             LegalMoves.Add(reachable);
             var marker = Instantiate(reachablePrefab);
