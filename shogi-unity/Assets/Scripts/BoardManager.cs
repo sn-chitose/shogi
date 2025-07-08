@@ -8,14 +8,14 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private GameObject[] piecePrefabs;
 
-    private Dictionary<string, GameObject> pieceTypes;
-    private Dictionary<string, List<Piece>> capturedPlayer1, capturedPlayer2;
+    public Dictionary<string, GameObject> PieceTypes { get; private set; }
+    public Dictionary<string, List<Piece>> CapturedPlayer1 { get; private set; }
+    public Dictionary<string, List<Piece>> CapturedPlayer2 { get; private set; }
 
     public Piece[,] Board { get; private set; }
     public Piece SelectedPiece { get; set; }
 
     public bool Busy { get; set; }
-
     void Awake()
     {
         if (instance == null)
@@ -26,16 +26,16 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
-        pieceTypes = new Dictionary<string, GameObject>();
+        PieceTypes = new Dictionary<string, GameObject>();
         foreach (var tilePrefab in piecePrefabs)
-            pieceTypes.Add(tilePrefab.name[..tilePrefab.name.IndexOf(' ')], tilePrefab);
+            PieceTypes.Add(tilePrefab.name[..tilePrefab.name.IndexOf(' ')], tilePrefab);
 
-        capturedPlayer1 = new Dictionary<string, List<Piece>>();
-        capturedPlayer2 = new Dictionary<string, List<Piece>>();
-        foreach (var type in pieceTypes.Keys)
+        CapturedPlayer1 = new Dictionary<string, List<Piece>>();
+        CapturedPlayer2 = new Dictionary<string, List<Piece>>();
+        foreach (var type in PieceTypes.Keys)
         {
-            capturedPlayer1.Add(type, new List<Piece>());
-            capturedPlayer2.Add(type, new List<Piece>());
+            CapturedPlayer1.Add(type, new List<Piece>());
+            CapturedPlayer2.Add(type, new List<Piece>());
         }
 
         Board = new Piece[9, 9];
@@ -68,7 +68,7 @@ public class BoardManager : MonoBehaviour
     // Add a piece to the board for both players
     private void AddPiece(string type, byte x, byte y, bool bothPlayers = true, bool player2Only = false)
     {
-        pieceTypes.TryGetValue(type, out var prefab);
+        PieceTypes.TryGetValue(type, out var prefab);
         if (prefab == null)
             return;
 
@@ -92,26 +92,29 @@ public class BoardManager : MonoBehaviour
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int(x, y)))
             DropPiece(x, y);
+        // add kifu
     }
 
     public void TryAndCapture(Piece toCapture)
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int((int)toCapture.transform.position.x, (int)toCapture.transform.position.y)))
             CapturePiece(toCapture);
+        // add kifu
     }
 
     public void TryAndMove(int x, int y)
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int(x, y)))
             MovePiece(x, y);
+        // add kifu
     }
 
     // Drops the selected piece to an empty position on the board
     // Assumes the move to be legal
-    private void DropPiece(int x, int y)
+    public void DropPiece(int x, int y)
     {
         Busy = true;
-        (SelectedPiece.IsPlayer2() ? capturedPlayer2 : capturedPlayer1)[SelectedPiece.Type]
+        (SelectedPiece.IsPlayer2() ? CapturedPlayer2 : CapturedPlayer1)[SelectedPiece.Type]
             .Remove(SelectedPiece);
         Board[x, y] = SelectedPiece;
 
@@ -130,10 +133,10 @@ public class BoardManager : MonoBehaviour
 
     // Moves the selected piece to capture the given piece
     // Assumes the move to be legal
-    private void CapturePiece(Piece toCapture)
+    public void CapturePiece(Piece toCapture)
     {
         Busy = true;
-        var hand = SelectedPiece.IsPlayer2() ? capturedPlayer2 : capturedPlayer1;
+        var hand = SelectedPiece.IsPlayer2() ? CapturedPlayer2 : CapturedPlayer1;
         hand[toCapture.Type].Add(toCapture);
         
         int x = (int)toCapture.transform.position.x,
@@ -148,7 +151,7 @@ public class BoardManager : MonoBehaviour
 
     // Moves the selected piece to an empty position on the board
     // Assumes the move to be legal
-    private void MovePiece(int x, int y)
+    public void MovePiece(int x, int y)
     {
         Busy = true;
         Board[(int)SelectedPiece.transform.position.x, (int)SelectedPiece.transform.position.y] = null;
@@ -172,10 +175,10 @@ public class BoardManager : MonoBehaviour
         foreach (var piece in Board)
             if (piece != null)
                 piece.UpdateReach();
-        foreach (var type in capturedPlayer1.Values)
+        foreach (var type in CapturedPlayer1.Values)
             foreach (var piece in type)
                 piece.UpdateReach();
-        foreach (var type in capturedPlayer2.Values)
+        foreach (var type in CapturedPlayer2.Values)
             foreach (var piece in type)
                 piece.UpdateReach();
     }

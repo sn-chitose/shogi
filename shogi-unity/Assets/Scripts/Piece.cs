@@ -6,7 +6,7 @@ public class Piece : MonoBehaviour
     [SerializeField] private GameObject reachablePrefab;
 
     public string Type { get; private set; }
-    public bool Promoted { get; private set; }
+    public bool Promoted { get; set; }
 
     public List<Vector2Int> Reach { get; private set; }
     public List<Vector2Int> Droppable { get; private set; }
