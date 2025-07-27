@@ -34,6 +34,18 @@ MonoBehaviour:
     m_Localized: 3d91b33cf111fb848a8ac61354c89610
     m_Metadata:
       m_Items: []
+  - m_Id: 320916583313408
+    m_Localized: 3d91b33cf111fb848a8ac61354c89610
+    m_Metadata:
+      m_Items: []
+  - m_Id: 320916977577984
+    m_Localized: '3d91b33cf111fb848a8ac61354c89610[YUGOTHR Atlas Material]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 328167461187584
+    m_Localized: 3d91b33cf111fb848a8ac61354c89610
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

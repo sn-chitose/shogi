@@ -35,10 +35,23 @@ MonoBehaviour:
     m_Key: activeFont
     m_Metadata:
       m_Items: []
+  - m_Id: 320916583313408
+    m_Key: MainScene/Canvas/KifuDropdown/Label
+    m_Metadata:
+      m_Items: []
+  - m_Id: 320916977577984
+    m_Key: MainScene/Canvas/KifuDropdown/Label 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 328167461187584
+    m_Key: MainScene/Canvas/KifuDropdown/Template/Viewport/Content/Item/Item Label
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items:
     - rid: 9125545797191467092
     - rid: 9125545797191467100
+    - rid: 9125545797191467123
   m_KeyGenerator:
     rid: 9125545797191467088
   references:
@@ -77,5 +90,23 @@ MonoBehaviour:
           m_TableCodes:
           - ja
           - en
+        - m_KeyId: 320916583313408
+          m_TableCodes:
+          - en
+          - ja
+        - m_KeyId: 328167461187584
+          m_TableCodes:
+          - en
+          - ja
         m_TypeString: TMPro.TMP_FontAsset, Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral,
           PublicKeyToken=null
+    - rid: 9125545797191467123
+      type: {class: AssetTypeMetadata, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries:
+        - m_KeyId: 320916977577984
+          m_TableCodes:
+          - en
+          - ja
+        m_TypeString: UnityEngine.Material, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
