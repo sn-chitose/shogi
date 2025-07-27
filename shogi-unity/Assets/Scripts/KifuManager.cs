@@ -88,7 +88,7 @@ public class KifuManager : MonoBehaviour
                     capturedPiece.SetRenderingOrder(0);
 
                     if (move.promotedCapture)
-                        capturedPiece.Promoted = true; // TODO add promoted visuals
+                        capturedPiece.Promoted = true;
                 }
             }
 
@@ -113,10 +113,9 @@ public class KifuManager : MonoBehaviour
             if (move.IsDrop)
                 board.DropPiece(move.end.x, move.end.y);
             else if (move.capturedType != null)
-                board.CapturePiece(board.Board[move.end.x, move.end.y]);
+                board.CapturePiece(board.Board[move.end.x, move.end.y], move.promoting);
             else
-                board.MovePiece(move.end.x, move.end.y);
-            // TODO add promoting handling
+                board.MovePiece(move.end.x, move.end.y, move.promoting);
 
             MoveNumber++;
             return true;
