@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour
 {
@@ -88,6 +91,57 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public bool IsPromotable(int x, int y)
+    {
+        if (SelectedPiece == null || SelectedPiece.IsHand() || SelectedPiece.Promoted)
+            return false;
+
+        return SelectedPiece.Type switch
+        {
+            "Fuhyou" or "Kyousha" or "Keima" or "Ginshou" or "Kakugyou" or "Hisha" => SelectedPiece.IsPlayer2() ?
+                                SelectedPiece.transform.position.y < 3 || y < 3 :
+                                SelectedPiece.transform.position.y > 5 || y > 5,
+            _ => false,
+        };
+    }
+
+    private void ShowPromotionMessage(UnityAction okAction, UnityAction cancelAction)
+    {
+        // Show promotion popup
+        var popup = GameObject.Find("Canvas").transform.Find("PromotePopup");
+        var buttons = popup.transform.Find("Promote_ButtonContainer");
+        var ok = buttons.Find("OkButton");
+        var cancel = buttons.Find("CancelButton");
+
+        // ensure localized font by rerendering
+        popup.transform.Find("Text_Promote_Confirmation").gameObject
+            .GetComponent<TextMeshProUGUI>()
+            .ForceMeshUpdate();
+        ok.GetChild(0).gameObject
+            .GetComponent<TextMeshProUGUI>()
+            .ForceMeshUpdate();
+        cancel.GetChild(0).gameObject
+            .GetComponent<TextMeshProUGUI>()
+            .ForceMeshUpdate();
+
+        // bind button handlers
+        ok.gameObject.GetComponent<Button>().onClick
+            .RemoveAllListeners();
+        ok.gameObject.GetComponent<Button>().onClick
+            .AddListener(okAction);
+        ok.gameObject.GetComponent<Button>().onClick
+            .AddListener(() => popup.gameObject.SetActive(false));
+
+        cancel.gameObject.GetComponent<Button>().onClick
+            .RemoveAllListeners();
+        cancel.gameObject.GetComponent<Button>().onClick
+            .AddListener(cancelAction);
+        cancel.gameObject.GetComponent<Button>().onClick
+            .AddListener(() => popup.gameObject.SetActive(false));
+
+        popup.gameObject.SetActive(true);
+    }
+
     public void TryAndDrop(int x, int y)
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int(x, y)))
@@ -98,15 +152,25 @@ public class BoardManager : MonoBehaviour
     public void TryAndCapture(Piece toCapture)
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int((int)toCapture.transform.position.x, (int)toCapture.transform.position.y)))
-            CapturePiece(toCapture);
-        // add kifu
+        {
+            if (IsPromotable((int)toCapture.transform.position.x, (int)toCapture.transform.position.y))
+                ShowPromotionMessage(() => CapturePiece(toCapture, true), () => CapturePiece(toCapture));
+            else
+                CapturePiece(toCapture);
+            // add kifu
+        }
     }
 
     public void TryAndMove(int x, int y)
     {
         if (SelectedPiece.LegalMoves.Contains(new Vector2Int(x, y)))
-            MovePiece(x, y);
-        // add kifu
+        {
+            if (IsPromotable(x, y))
+                ShowPromotionMessage(() => MovePiece(x, y, true), () => MovePiece(x, y));
+            else
+                MovePiece(x, y);
+            // add kifu
+        }
     }
 
     // Drops the selected piece to an empty position on the board
@@ -133,12 +197,12 @@ public class BoardManager : MonoBehaviour
 
     // Moves the selected piece to capture the given piece
     // Assumes the move to be legal
-    public void CapturePiece(Piece toCapture)
+    public void CapturePiece(Piece toCapture, bool promote = false)
     {
         Busy = true;
         var hand = SelectedPiece.IsPlayer2() ? CapturedPlayer2 : CapturedPlayer1;
         hand[toCapture.Type].Add(toCapture);
-        
+
         int x = (int)toCapture.transform.position.x,
             y = (int)toCapture.transform.position.y;
         toCapture.SetRenderingOrder(10 * hand[toCapture.Type].Count);
@@ -146,12 +210,12 @@ public class BoardManager : MonoBehaviour
         seq.Join(toCapture.transform.DOMove(BoardGrid.GetPositionWhenCaptured(toCapture, SelectedPiece.IsPlayer2()), 0.5f));// TODO find location for captured pieces
         seq.Join(toCapture.transform.DORotate(new Vector3(0, 0, SelectedPiece.IsPlayer2() ? 180 : 0), 0.5f, RotateMode.FastBeyond360));// TODO find location for captured pieces
         seq.OnComplete(() => { Busy = false; });
-        MovePiece(x, y);
+        MovePiece(x, y, promote);
     }
 
     // Moves the selected piece to an empty position on the board
     // Assumes the move to be legal
-    public void MovePiece(int x, int y)
+    public void MovePiece(int x, int y, bool promote = false)
     {
         Busy = true;
         Board[(int)SelectedPiece.transform.position.x, (int)SelectedPiece.transform.position.y] = null;
@@ -192,6 +256,6 @@ public class BoardManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

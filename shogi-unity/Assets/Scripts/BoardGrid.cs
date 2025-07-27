@@ -37,7 +37,7 @@ public class BoardGrid : MonoBehaviour
         if (BoardManager.instance.Busy)
             return;
 
-        if (GameObject.Find("PromotePopup").activeSelf)
+        if (GameObject.Find("Canvas").transform.Find("PromotePopup").gameObject.activeSelf)
             return;
 
         // If a piece is selected, try to move it to this empty position

@@ -84,7 +84,7 @@ public class Piece : MonoBehaviour
         if (BoardManager.instance.Busy)
             return;
 
-        if (GameObject.Find("PromotePopup").activeSelf)
+        if (GameObject.Find("Canvas").transform.Find("PromotePopup").gameObject.activeSelf)
             return;
 
         if (BoardManager.instance.SelectedPiece == null)
