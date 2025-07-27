@@ -65,21 +65,24 @@ public class Piece : MonoBehaviour
 
     public void SelectPiece()
     {
-        BoardManager.instance.SelectedPiece = this;
-        transform.Find("SelectionCursor").gameObject.SetActive(true);
-
-        var candidates = IsHand() ? Droppable : Reach;
-        foreach (var reachable in candidates)
+        if (KifuManager.instance.MoveNumber % 2 == 1 == IsPlayer2())
         {
-            if (MoveManager.IsCheckAfterMove(this, reachable))
-                continue;
-            if (IsHand() && MoveManager.IsCheckmateAfterDropFuhyou(this, reachable))
-                continue;
+            BoardManager.instance.SelectedPiece = this;
+            transform.Find("SelectionCursor").gameObject.SetActive(true);
 
-            LegalMoves.Add(reachable);
-            var marker = Instantiate(reachablePrefab);
-            marker.transform.parent = transform;
-            marker.transform.position = new Vector3(reachable.x, reachable.y, 0f);
+            var candidates = IsHand() ? Droppable : Reach;
+            foreach (var reachable in candidates)
+            {
+                if (MoveManager.IsCheckAfterMove(this, reachable))
+                    continue;
+                if (IsHand() && MoveManager.IsCheckmateAfterDropFuhyou(this, reachable))
+                    continue;
+
+                LegalMoves.Add(reachable);
+                var marker = Instantiate(reachablePrefab);
+                marker.transform.parent = transform;
+                marker.transform.position = new Vector3(reachable.x, reachable.y, 0f);
+            }
         }
     }
 
