@@ -100,6 +100,21 @@ public class MoveManager
         return false;
     }
 
+    public static bool IsPromotable(Piece piece, int x, int y)
+    {
+        if (piece == null || piece.IsHand() || piece.Promoted)
+            return false;
+
+        return piece.Type switch
+        {
+            "Fuhyou" or "Kyousha" or "Keima" or "Ginshou" or "Kakugyou" or "Hisha" => piece.IsPlayer2() ?
+                                piece.transform.position.y < 3 || y < 3 :
+                                piece.transform.position.y > 5 || y > 5,
+            _ => false,
+        };
+    }
+
+
     // Positions where a piece can be dropped from the hand
     // Excludes last rows and same column Fuhyou, but does not evaluate checkmate by Fuhyou drop
     public static List<Vector2Int> GetDroppable(Piece piece)
