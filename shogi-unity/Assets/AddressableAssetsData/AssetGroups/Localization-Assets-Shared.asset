@@ -15,6 +15,13 @@ MonoBehaviour:
   m_GroupName: Localization-Assets-Shared
   m_GUID: 70db0d4140c5fdd429fe30308f4e8a2f
   m_SerializeEntries:
+  - m_GUID: 3d91b33cf111fb848a8ac61354c89610
+    m_Address: YUGOTHR SDF
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    - Locale-ja
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bc3f815a2297fe3458445d2df8acc314
     m_Address: Assets/Locales/FontTable Shared Data.asset
     m_ReadOnly: 1
