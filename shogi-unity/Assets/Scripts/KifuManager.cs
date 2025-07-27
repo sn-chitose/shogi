@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DG.Tweening;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -44,6 +45,24 @@ public partial class KifuManager : MonoBehaviour
                 dropdown.RefreshShownValue();
             }
         };
+
+        dropdown.onValueChanged.AddListener(value =>
+        {
+            while (value < MoveNumber - 1 && UndoMove()) ;
+        });
+
+        dropdown.onValueChanged.AddListener(value =>
+        {
+            void Iteration()
+            {
+                if (value >= MoveNumber && RedoMove())
+                {
+                    DOVirtual.DelayedCall(0.51f, Iteration);
+                }
+            }
+            Iteration();
+            dropdown.RefreshShownValue();
+        });
     }
 
     public void AddMove(Piece moving, Piece toCapture, bool promoting = false)
@@ -66,22 +85,22 @@ public partial class KifuManager : MonoBehaviour
             "en" => kifu.Last().captionEN,
             _ => kifu.Last().captionJP
         }));
-        dropdown.value = MoveNumber;
-        dropdown.RefreshShownValue();
         MoveNumber++;
+        dropdown.value = MoveNumber - 1;
+        dropdown.RefreshShownValue();
     }
 
     public bool UndoMove()
     {
         if (MoveNumber > 0)
         {
-            var move = kifu[MoveNumber];
+            var move = kifu[MoveNumber - 1];
             var board = BoardManager.instance;
             var piece = board.Board[move.end.x, move.end.y];
 
             if (move.IsDrop)
             {
-                bool isPlayer2 = MoveNumber % 2 == 1;
+                bool isPlayer2 = MoveNumber % 2 == 0;
                 piece = board.Board[move.end.x, move.end.y];
                 board.Board[move.end.x, move.end.y] = null;
 
@@ -94,19 +113,19 @@ public partial class KifuManager : MonoBehaviour
             else
             {
                 board.Board[move.start.x, move.start.y] = piece;
-                piece.transform.position.Set(move.start.x, move.start.y, 0f);
+                piece.transform.position = new Vector3(move.start.x, move.start.y, 0f);
                 if (move.promoting)
                     piece.Promoted = false;
 
                 if (move.capturedType != null)
                 {
-                    bool isPlayer2 = MoveNumber % 2 == 1;
+                    bool isPlayer2 = MoveNumber % 2 == 0;
                     var capturedList = (isPlayer2 ? board.CapturedPlayer2 : board.CapturedPlayer1)[move.capturedType];
-                    var capturedPiece = capturedList[-1];
-                    capturedList.RemoveAt(-1);
+                    var capturedPiece = capturedList[^1];
+                    capturedList.RemoveAt(capturedList.Count - 1);
                     board.Board[move.end.x, move.end.y] = capturedPiece;
 
-                    capturedPiece.transform.position.Set(move.end.x, move.end.y, 0f);
+                    capturedPiece.transform.position = new Vector3(move.end.x, move.end.y, 0f);
                     capturedPiece.transform.Rotate(0f, 0f, 180f - capturedPiece.transform.rotation.eulerAngles.z);
                     capturedPiece.SetRenderingOrder(0);
 
@@ -115,7 +134,10 @@ public partial class KifuManager : MonoBehaviour
                 }
             }
 
-            board.SelectedPiece.DeselectPiece();
+            if (board.SelectedPiece)
+            {
+                board.SelectedPiece.DeselectPiece();
+            }
             board.UpdateReachForAll();
 
             MoveNumber--;
@@ -126,7 +148,7 @@ public partial class KifuManager : MonoBehaviour
 
     public bool RedoMove()
     {
-        if (MoveNumber < kifu.Count)
+        if (MoveNumber <= kifu.Count)
         {
             var move = kifu[MoveNumber];
             var board = BoardManager.instance;
