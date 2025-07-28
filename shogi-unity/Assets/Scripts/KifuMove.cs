@@ -163,10 +163,14 @@ public partial class KifuManager
                 piece.transform.position.y == start.y)))
             {
                 parts.Add($"{9 - start.x}{9 - start.y}");
+                parts.Add(drop ? "'" :
+                    capturedType != null ? "x" : "-");
             }
-
-            parts.Add(drop ? "'" :
-                capturedType != null ? "x" : "");
+            else
+            {
+                parts.Add(drop ? "'" :
+                    capturedType != null ? "x" : "");
+            }
 
             parts.Add($"{9 - end.x}{9 - end.y}");
 
