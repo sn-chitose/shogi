@@ -125,8 +125,9 @@ public partial class KifuManager : MonoBehaviour
                     capturedList.RemoveAt(capturedList.Count - 1);
                     board.Board[move.end.x, move.end.y] = capturedPiece;
 
-                    capturedPiece.transform.position = new Vector3(move.end.x, move.end.y, 0f);
-                    capturedPiece.transform.Rotate(0f, 0f, 180f - capturedPiece.transform.rotation.eulerAngles.z);
+                    capturedPiece.transform.SetPositionAndRotation(
+                        new Vector3(move.end.x, move.end.y, 0f),
+                        Quaternion.Euler(0f, 0f, 180f - capturedPiece.transform.rotation.eulerAngles.z));
                     capturedPiece.SetRenderingOrder(0);
 
                     if (move.promotedCapture)
