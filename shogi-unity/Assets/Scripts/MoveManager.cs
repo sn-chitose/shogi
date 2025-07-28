@@ -100,6 +100,20 @@ public class MoveManager
         return false;
     }
 
+    public static bool IsPromotionForced(Piece piece, int x, int y)
+    {
+        if (piece == null || piece.IsHand() || piece.Promoted)
+            return false;
+
+        return piece.Type switch
+        {
+            "Fuhyou" or "Kyousha" => piece.IsPlayer2() ? y == 0 : y == 8,
+            "Keima" => piece.IsPlayer2() ? y < 2 : y > 6,
+            _ => false,
+        };
+    }
+
+    // Checks whether a piece can be promoted when moved to the specified position
     public static bool IsPromotable(Piece piece, int x, int y)
     {
         if (piece == null || piece.IsHand() || piece.Promoted)
